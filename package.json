@@ -1,7 +1,7 @@
 {
   "name": "@wulechuan/wlc",
   "version": "0.0.1",
-  "description": "Web Logic Controllers; Wu Le Chuan",
+  "description": "吴乐川。 Wu Le Chuan; Web Logic Controllers; We Love Children",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
