@@ -11,13 +11,13 @@ var WAT = new (function AnimationToolkits() {
 		var _sX = wlcJS.getSafeNumber(scaleX, 1);
 		var _sY = wlcJS.getSafeNumber(scaleY, _sX);
 		var _sZ = wlcJS.getSafeNumber(scaleZ, _sX);
-		wlcJS.arraylize(elements).forEach(function (element, i, _elements) {
+		wlcJS.arraylize(elements).forEach(function (element) {
 			element.style.transform = 'scale3d('+_sX+','+_sY+','+_sZ+')';
 		});
 	};
 
 	this.pauseAnimationsOf = function(elements) {
-		wlcJS.arraylize(elements).forEach(function (element, i, _elements) {
+		wlcJS.arraylize(elements).forEach(function (element) {
 			if (!isDomElement(element)) return undefined;
 			element.animationIsRunning = false;
 			element.style.webkitAnimationPlayState = 'paused';
@@ -26,7 +26,7 @@ var WAT = new (function AnimationToolkits() {
 	};
 
 	this.resumeAnimationsOf = function(elements) {
-		wlcJS.arraylize(elements).forEach(function (element, i, _elements) {
+		wlcJS.arraylize(elements).forEach(function (element) {
 			if (!isDomElement(element)) return undefined;
 			element.animationIsRunning = true;
 			element.style.webkitAnimationPlayState = 'running';
@@ -35,7 +35,7 @@ var WAT = new (function AnimationToolkits() {
 	};
 
 	this.toggleAnimationsOf = function(elements) {
-		wlcJS.arraylize(elements).forEach(function (element, i, _elements) {
+		wlcJS.arraylize(elements).forEach(function (element) {
 			if (!isDomElement(element)) return undefined;
 			if (typeof element.animationIsRunning === 'undefined') element.animationIsRunning = true;
 			if (element.animationIsRunning) {
@@ -51,7 +51,7 @@ var WAT = new (function AnimationToolkits() {
 	};
 
 	this.clearAnimationsOf = function(elements) {
-		wlcJS.arraylize(elements).forEach(function (element, i, _elements) {
+		wlcJS.arraylize(elements).forEach(function (element) {
 			if (!isDomElement(element)) return undefined;
 			element.animationIsRunning = false;
 			element.style.webkitAnimationPlayState = '';
