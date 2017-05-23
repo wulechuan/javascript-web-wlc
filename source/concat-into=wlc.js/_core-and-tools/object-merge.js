@@ -1,6 +1,10 @@
+/**
+ * @author 吴乐川 <wulechuan@live.com>
+ * @module object-merge
+ */
 (function (factory) {
 	var wlc = window.wlc;
-	wlc.utitlies.mergeBIntoA = factory(window.console);
+	wlc.utilities.mergeBIntoA = factory(window.console);
 })(function (C) {
 	Object.prototype.mergePropertiesFrom = function() {
 		mergeBIntoA.apply(null, [this].concat(Array.prototype.slice(arguments)));
@@ -9,83 +13,124 @@
 	return mergeBIntoA;
 
 	/**
+	 * @author 吴乐川 <wulechuan@live.com>
 	 * 
-	 * @param {?object} A 
-	 * @param {!object} B 
-	 * @param {?number} [objectMergingMode=0]
-	 * 		value is 0: Uses reference of the source property, which is an object,
+	 * @function - Merge all properties of object B into object A,
+	 * 				>	with extra options controlling the merging behaviours.
+	 * @name mergeBIntoA
+	 * 
+	 * @return {object} The original object A, or the newly created object if A was not a valid object.
+	 * @param {?object} A - Object to accept new properties.
+	 * 				>		If it was not an object or was a null, then a new object will be created.
+	 * 
+	 * @param {!object} B - Object as the property source.
+	 * @param {?number} [objectTransferingMode=0]
+	 * 		value is 0: Reference Overwriting.
+	 * 				>	Uses reference of the source property, which is an object,
 	 * 					to overwrite the target property.
-	 * 		value is 1: Uses a deeply copied duplication of the source property, which is an object,
+	 * 
+	 * 		value is 1: Copy.
+	 * 				>	Uses a deeply copied duplication of the source property, which is an object,
 	 * 					to overwrite the target property.
-	 * 		value is 2: deeply copy source object properties to into target property object.
+	 * 
+	 * 		value is 2: Deeply Copy.
+	 * 				>	deeply copy source object properties to into target property object.
 	 * 					If target propert was NOT an object,
 	 * 					then take the deeply copied duplication of the source object.
-	 * 		any other values: treated as if it's zero.
+	 * 
+	 * 		any other value: Reference Overwriting.
+	 * 				>	treated as if it's zero.
 	 * 
 	 *		Note that the mentioned deeply copyings only travel into objects nested under objects,
 	 *		but not arrays inside objects.
-	 * @param {?number} [arrayMergingMode=3]
-	 * 		value is 0: Uses reference of the source property, which is an array,
+	 *
+	 * @param {?number} [arrayTransferingMode=3]
+	 * 		value is 0: Reference Overwriting.
+	 * 				>	Uses reference of the source property, which is an array,
 	 * 					to overwrite the target property.
-	 * 		value is 1: Uses a deeply copied duplication of the source property, which is an array,
+	 * 
+	 * 		value is 1: Copy.
+	 * 				>	Uses a deeply copied duplication of the source property, which is an array,
 	 * 					to overwrite the target property.
-	 * 		value is 2: concatenates source array to target array property.
+	 * 
+	 * 		value is 2: Deep Copy.
+	 * 				>	concatenates source array to target array property.
 	 * 					If target propert was NOT an array,
 	 * 					then take the deeply copied duplication of the source array.
-	 * 		any other values: treated same policy as "{@link objectMergingMode}";
+	 * 
+	 * 		any other value: Reference Overwriting.
+	 * 				>	Treats the policy of transfering an array
+	 * 					the same as that of an object decided by "objectTransferingMode".
+	 * 					A value of 3 is taken for inner usage.
 	 * 
 	 *		Note that the mentioned deeply copyings only travel into arrays inside arrays,
 	 *		but not objects inside arrays.
 	 */
-	function mergeBIntoA(A, B, objectMergingMode, arrayMergingMode) {
-		if (A === B) {
+	function mergeBIntoA(a, b, objectTransferingMode, arrayTransferingMode) {
+		if (a === b) {
 			C.e('Merging soure is the same object as the target.');
 			return;
 		}
 
-		if (A instanceof Node) {
+		if (a instanceof Node) {
 			C.e('Should NOT copy properties to a DOM Node.');
 			return;
 		}
 
-		if (B instanceof Node) {
+		if (b instanceof Node) {
 			C.e('Should NOT copy properties from a DOM Node.');
 			return;
 		}
 
-		if (A === window) {
+		if (a === window) {
 			C.e('Should NOT copy proterties to {window} object.');
 			return;
 		}
-		if (B === window) {
+		if (b === window) {
 			C.e('Should NOT copy proterties from {window} object.');
 			return;
 		}
 
-		if (!B || typeof B !== 'object') {
+		if (!b || typeof b !== 'object') {
 			C.e('Merging source is NOT an object.');
 			return;
 		}
 
-		if (!A || typeof A !== 'object') A = {};
+		if (!a || typeof a !== 'object') {
+			a = {};
+		}
 
 
+		if (objectTransferingMode === true) {
+			objectTransferingMode = 1;
+		} else if (objectTransferingMode === false) {
+			objectTransferingMode = 0;
+		} else {
+			objectTransferingMode = parseInt(objectTransferingMode);
+			if (isNaN(objectTransferingMode) || objectTransferingMode<0 || objectTransferingMode>2) {
+				objectTransferingMode = 0;
+			}
+		}
 
-		objectMergingMode = parseInt(objectMergingMode);
-		arrayMergingMode  = parseInt(arrayMergingMode);
 
-		if (isNaN(objectMergingMode) || objectMergingMode<0 || objectMergingMode>2) objectMergingMode = 0;
-		if (isNaN(arrayMergingMode)  || arrayMergingMode<0  || arrayMergingMode>2)  arrayMergingMode  = 3;
+		if (arrayTransferingMode === true) {
+			arrayTransferingMode = 1;
+		} else if (arrayTransferingMode === false) {
+			arrayTransferingMode = 0;
+		} else {
+			arrayTransferingMode = parseInt(arrayTransferingMode);
+			if (isNaN(arrayTransferingMode) || arrayTransferingMode<0 || arrayTransferingMode>2) {
+				arrayTransferingMode = 3;
+			}
+		}
 
-		shouldNotDeeplyCopyObjectProperties = !!shouldNotDeeplyCopyObjectProperties;
-		shouldNotDeeplyCopyArrayElements    = !!shouldNotDeeplyCopyArrayElements;
 
 		var key, sourceProperty, targetProperty;
-		for (key in B) {
-			targetProperty = A[key];
-			sourceProperty = B[key];
+		for (key in b) {
+			targetProperty = a[key];
+			sourceProperty = b[key];
 
-			if (A.hasOwnProperty(key)
+			if (a.hasOwnProperty(key)
 				&& typeof sourceProperty !== 'undefined'
 				&& sourceProperty !== null
 				&& typeof targetProperty !== 'undefined'
@@ -101,37 +146,91 @@
 
 
 
-			if (sourceProperty === null
-				|| typeof sourceProperty !== 'object'
+			if (sourceProperty instanceof Node
 				|| sourceProperty === window
-				|| sourceProperty instanceof Node
-				|| shouldNotDeeplyCopyObjectProperties
+				|| sourceProperty === null
+				|| typeof sourceProperty !== 'object'
 			) {
-				A[key] = sourceProperty;
+				a[key] = sourceProperty;
 				continue;
 			}
 
 
 
 			if (Array.isArray(sourceProperty)) {
-				if (!Array.isArray(A[key]) || shouldNotDeeplyCopyArrayElements) {
-					A[key] = [].concat(sourceProperty); // make sure we use a duplication
+				if (arrayTransferingMode === 0 || (arrayTransferingMode ===3 && objectTransferingMode === 0)) {
+					a[key] = sourceProperty;
+					continue;
+				}
+
+				var deeplyCopyHost = mergeBIntoA({}, sourceProperty, objectTransferingMode, arrayTransferingMode);
+				if (!Array.isArray(targetProperty)) {
+					a[key] = [].concat(sourceProperty); // make sure we use a duplication
 				} else {
-					A[key] = A[key].concat(sourceProperty);
+					a[key] = targetProperty.concat(sourceProperty);
 				}
 				continue;
+			} else if (typeof sourceProperty === 'object') {
+				if (objectTransferingMode===0) {
+					a[key] = sourceProperty;
+					continue;
+				}
+
+
 			}
 
 
 			// Now the sourceProperty can ONLY be object, let's check out whether localProperty is also an object
-			if (A[key] === null || typeof A[key] !== 'object') {
-				A[key] = {};
+			if (a[key] === null || typeof a[key] !== 'object') {
+				a[key] = {};
 			}
 
 			// recursively migrate properties
-			mergeBIntoA(A[key], sourceProperty, shouldNotDeeplyCopyObjectProperties, shouldNotDeeplyCopyArrayElements);
+			mergeBIntoA(a[key], sourceProperty, objectTransferingMode, arrayTransferingMode);
 		}
 
-		return A;
+		return a;
+	}
+
+
+	/**
+	 * @author 吴乐川 <wulechuan@live.com>
+	 * @param {!array} sourceArray 
+	 * @param {?boolean} shouldUseReferenceOfNestedArrays 
+	 * @param {?number} objectTransferingMode 
+	 */
+	function getCopyOfAnArray(sourceArray, shouldUseReferenceOfNestedArrays, objectTransferingMode) {
+		if (!Array.isArray(sourceArray)) {
+			C.e('Non-array object passed in.');
+			return undefined;
+		}
+
+
+		shouldUseReferenceOfNestedArrays = !!shouldUseReferenceOfNestedArrays;
+
+
+		if (objectTransferingMode === true) {
+			objectTransferingMode = 1;
+		} else if (objectTransferingMode === false) {
+			objectTransferingMode = 0;
+		} else {
+			objectTransferingMode = parseInt(objectTransferingMode);
+			if (isNaN(objectTransferingMode) || objectTransferingMode<0 || objectTransferingMode>2) {
+				objectTransferingMode = 0;
+			}
+		}
+
+
+		var result = [];
+		for (var i=0; i<sourceArray.length; i++) {
+			var element = sourceArray[i];
+			if (typeof element !== 'object' || !element || shouldUseReferenceOfNestedArrays) {
+				result.push(element);
+				continue;
+			}
+
+		}
+
+		return result;
 	}
 });
