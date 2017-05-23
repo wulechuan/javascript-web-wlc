@@ -1,3 +1,5 @@
+/* old wlc.js */
+
 /* global
 	$
 */
@@ -3096,9 +3098,9 @@ window.webLogicControls = {};
 				}
 				
 				if (formatterRemoved) {
-					if (!isFirstTime && formatterChanged) {
+					// if (!isFirstTime && formatterChanged) {
 
-					}
+					// }
 				} else {
 					if (!formatterIsSpecified) {
 						formatter = WCU.objectToolkit.evaluateDotNotationChainViaHTMLAttribute(
@@ -3171,14 +3173,15 @@ window.webLogicControls = {};
 
 
 				if (validatorRemoved) {
-					if (!isFirstTime && validatorChanged) {
+					// if (!isFirstTime && validatorChanged) {
 
-					}
+					// }
 				} else {
 					if (
 						(!validatorIsSpecified && typeof status.validator === 'function') ||
 						( validatorIsSpecified && validator === status.validator)
 					) {
+						// nothing to do
 					} else {
 						if (validatorIsSpecified) {
 							status.validator = validator;
@@ -4481,6 +4484,7 @@ window.webLogicControls = {};
 				currentDegree = _parseDegreeVia(currentDegree);
 
 				if (initOptions && !!initOptions.disableInitialUpdate) {
+					// nothing to do
 				} else {
 					var thisController = this;
 					setTimeout(function () { // important for first running, especially for the first acting half element
@@ -4745,6 +4749,7 @@ window.webLogicControls = {};
 					// if (stringIsPercentage) {
 					// }
 				} else if (typeof newPercentage === 'number' && !isNaN(newPercentage)) {
+					// nothing to do
 				} else {
 					newPercentage = 0;
 				}
@@ -4756,6 +4761,7 @@ window.webLogicControls = {};
 
 			function setDegreeTo(newDegree) {
 				if (status.isRunning && this.options.doNotQueueAnyDregree) {
+					// nothing to do
 				} else {
 					queueOneNewDegree.call(this, newDegree);
 				}
@@ -5426,6 +5432,7 @@ window.webLogicControls = {};
 
 
 				if (initOptions && initOptions.doNotShowPanelAtInit) {
+					// nothing to do
 				} else {
 					// C.l('Showing init panel...');
 					this.showPanelViaTab(initOptions ? initOptions.initTab : 0);
