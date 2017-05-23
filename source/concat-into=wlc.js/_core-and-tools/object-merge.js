@@ -238,10 +238,11 @@
 
 
 
+			var sourcePropertyHasBeenTravelled = false;
+			var i, travelRecord;
 			if (shouldProceedSafeReferencingCheck) {
-				var sourcePropertyHasBeenTravelled = false;
-				for (var i=0; i<allTravelledReferences.length; i++) {
-					var travelRecord = allTravelledReferences[i];
+				for (i=0; i<allTravelledReferences.length; i++) {
+					travelRecord = allTravelledReferences[i];
 					if (sourceProperty === travelRecord.sourceProperty) {
 						sourcePropertyHasBeenTravelled = true;
 						break;
@@ -249,9 +250,16 @@
 				}
 
 				if (sourcePropertyHasBeenTravelled) {
-					a[key] = travelRecord.targetProperty;
+					a[key] = travelRecord.promisedPropertyOwners.push(a);
 					continue;
 				}
+
+				allTravelledReferences.push({
+					sourceProperty: sourceProperty,
+					targetProperty: undefined,
+					propertyKey: key,
+					promisedPropertyOwners: []
+				});
 			}
 
 			// Again, there is a "continue" statement above nested in the if clause,
@@ -310,25 +318,32 @@
 			}
 
 
-			allTravelledReferences.push({
-				sourceProperty: sourceProperty,
-				targetProperty: a[key]
-			});
-
-
-			// Now the sourceProperty can ONLY be object, let's check out whether localProperty is also an object
-			// if (a[key] === null || typeof a[key] !== 'object') {
-			// 	a[key] = {};
-			// }
-
-			// recursively transfer properties
-			// mergeBIntoA(a[key], sourceProperty, objectTransferingMode, arrayTransferingMode);
+			// "targetPropertyIsNotReusable" to be implemented
+			if (shouldProceedSafeReferencingCheck && targetPropertyIsNotReusable) {
+				allTravelledReferences.pop();
+			}
 		}
 
 
 
+		/***
+		 * The condition below can use a shortcut,
+		 * because "thisIsTopLevelInvocation" is never true
+		 * if "shouldProceedSafeReferencingCheck" is false.
+		 * In another word, if "thisIsTopLevelInvocation" is true,
+		 * then the "shouldProceedSafeReferencingCheck" must also be true.
+		 */
+		if (/* shouldProceedSafeReferencingCheck && */ thisIsTopLevelInvocation) {
+			for (i=0; i<allTravelledReferences.length; i++) {
+				travelRecord = allTravelledReferences[i];
+				var propertyKey = travelRecord.propertyKey;
+				var propertyOwners = travelRecord.promisedPropertyOwners;
+				for (var j=0; j<propertyOwners.length; j++) {
+					var owner = propertyOwners[j];
+					owner[propertyKey] = travelRecord.targetProperty;
+				}
+			}
 
-		if (thisIsTopLevelInvocation) {
 			delete safeReferencingCheckTokenHost[safeReferencingCheckToken];
 		}
 
