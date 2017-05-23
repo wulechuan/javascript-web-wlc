@@ -4,8 +4,15 @@
  */
 (function (factory) {
 	var wlc = window.wlc;
-	wlc.utilities.mergeBIntoA = factory(window.console);
-})(function (C) {
+	var utilities = wlc.utilities;
+
+	utilities.mergeBIntoA = factory(
+		utilities.generateAUniqueTokenUnder,
+		window.console // new wlc.Console('Utilities > object > merging')
+	);
+})(function (generateAUniqueTokenUnder, C) {
+	var recursivelyTravelledReferencesHost = {};
+
 	Object.prototype.mergePropertiesFrom = function() {
 		mergeBIntoA.apply(null, [this].concat(Array.prototype.slice(arguments)));
 	};
@@ -25,48 +32,63 @@
 	 * 
 	 * @param {!object} B - Object as the property source.
 	 * @param {?number} [objectTransferingMode=0]
-	 * 		value is 0: Reference Overwriting.
-	 * 				>	Uses reference of the source property, which is an object,
-	 * 					to overwrite the target property.
+	 * 		value is 0: Reference overwriting.
+	 * 				>	Overwrite the target property with
+	 * 					a reference of the source property, which is an object.
 	 * 
-	 * 		value is 1: Copy.
-	 * 				>	Uses a deeply copied duplication of the source property, which is an object,
-	 * 					to overwrite the target property.
+	 * 		value is 1: Deep copy.
+	 * 				>	Overwrite the target property with
+	 * 					a deep copy of the source property, which is an object.
 	 * 
-	 * 		value is 2: Deeply Copy.
-	 * 				>	deeply copy source object properties to into target property object.
-	 * 					If target propert was NOT an object,
+	 * 		value is 2: Deep merge.
+	 * 				>	Deeply copy source object properties into
+	 * 					the original target property object,
+	 * 					keeping those existing properties of the target property object,
+	 * 					as long as they are not overwritten
+	 * 					by properties coming from the source object.
+	 * 					If the target property was NOT an object,
 	 * 					then take the deeply copied duplication of the source object.
 	 * 
 	 * 		any other value: Reference Overwriting.
 	 * 				>	treated as if it's zero.
 	 * 
 	 *		Note that the mentioned deeply copyings only travel into objects nested under objects,
-	 *		but not arrays inside objects.
+	 *		but not arrays nested under objects.
 	 *
-	 * @param {?number} [arrayTransferingMode=3]
-	 * 		value is 0: Reference Overwriting.
-	 * 				>	Uses reference of the source property, which is an array,
-	 * 					to overwrite the target property.
+	 * @param {?number} [arrayTransferingMode=0]
+	 * 		value is 0: Reference overwriting.
+	 * 				>	Overwrite the target property with
+	 * 					a reference of the source property, which is an array.
 	 * 
-	 * 		value is 1: Copy.
-	 * 				>	Uses a deeply copied duplication of the source property, which is an array,
-	 * 					to overwrite the target property.
+	 * 		value is 1: Deep copy.
+	 * 				>	Overwrite the target property with
+	 * 					a deep copy of the source property, which is an array.
 	 * 
-	 * 		value is 2: Deep Copy.
-	 * 				>	concatenates source array to target array property.
-	 * 					If target propert was NOT an array,
+	 * 		value is 2: Concatenate with deep copies of nested arrays.
+	 * 				>	Append elements of the source array to the original target array,
+	 * 					with all nested sub-arrays copied deeply.
+	 * 					If the target property was NOT an array,
 	 * 					then take the deeply copied duplication of the source array.
 	 * 
-	 * 		any other value: Reference Overwriting.
+	 * 		value is 3: Concatenate without diving recursively into nested arrays.
+	 * 				>	Append direct elements of source array to the original target array.
+	 * 					If the target property was NOT an array,
+	 * 					then take a direct copy of the source array.
+	 * 
+	 * 		any other value: Reference overwriting.
 	 * 				>	Treats the policy of transfering an array
 	 * 					the same as that of an object decided by "objectTransferingMode".
-	 * 					A value of 3 is taken for inner usage.
 	 * 
 	 *		Note that the mentioned deeply copyings only travel into arrays inside arrays,
 	 *		but not objects inside arrays.
+	 *
+	 * @param {?(boolean|string)} [proceedSafeCheckSwithOrKey=undefined]
+	 * 				>	Set to true to prevent infinite recursive caused by inter-referencing or self referencing.
+	 * 					Set to a falthy value to skip the referencing checking.
+	 * 					If it's a string, then the string is used as the token for cached references
+	 * 					of objects and arrays that are travelled during current root invocation.
 	 */
-	function mergeBIntoA(a, b, objectTransferingMode, arrayTransferingMode) {
+	function mergeBIntoA(a, b, objectTransferingMode, arrayTransferingMode, safeReferencingCheckSwithOkToken) {
 		if (a === b) {
 			C.e('Merging soure is the same object as the target.');
 			return;
@@ -119,75 +141,198 @@
 			arrayTransferingMode = 0;
 		} else {
 			arrayTransferingMode = parseInt(arrayTransferingMode);
-			if (isNaN(arrayTransferingMode) || arrayTransferingMode<0 || arrayTransferingMode>2) {
-				arrayTransferingMode = 3;
+			if (isNaN(arrayTransferingMode) || arrayTransferingMode<0 || arrayTransferingMode>3) {
+				arrayTransferingMode = objectTransferingMode;
 			}
+		}
+
+	
+		var shouldProceedSafeReferencingCheck = !!safeReferencingCheckSwithOkToken;
+		var safeReferencingCheckTokenHost = recursivelyTravelledReferencesHost;
+		var safeReferencingCheckToken;
+		var allTravelledReferences;
+		var thisIsTopLevelInvocation = false;
+		if (shouldProceedSafeReferencingCheck) {
+			if (typeof safeReferencingCheckSwithOkToken === 'string') {
+				safeReferencingCheckToken = safeReferencingCheckSwithOkToken;
+			} else {
+				thisIsTopLevelInvocation = true;
+				safeReferencingCheckToken = generateAUniqueTokenUnder(safeReferencingCheckTokenHost);
+				safeReferencingCheckTokenHost[safeReferencingCheckToken] = [];
+
+				C.w(
+					'Checking referencing is turned on during recursively travelling an object.',
+					'This makes it safer to travelling an object,',
+					'however, will also slow down the process dramatically.'
+				);
+			}
+
+			allTravelledReferences = safeReferencingCheckTokenHost[safeReferencingCheckToken];
 		}
 
 
 		var key, sourceProperty, targetProperty;
 		for (key in b) {
-			targetProperty = a[key];
 			sourceProperty = b[key];
+			targetProperty = a[key];
+
+			var sourcePropertyType = typeof sourceProperty;
+			var targetPropertyType = typeof targetProperty;
+
+			var sourcePropertyIsAnArray = Array.isArray(sourceProperty);
+			var targetPropertyIsAnArray = Array.isArray(targetProperty);
+
+			var sourcePropertyIsAnObjectButNotAnArray =
+					!!sourcePropertyType
+				&&  sourcePropertyType === 'object'
+				&& !sourcePropertyIsAnArray
+				;
+
+			var targetPropertyIsAnObjectButNotAnArray =
+					!!targetPropertyType
+				&&  targetPropertyType === 'object'
+				&& !targetPropertyIsAnArray
+				;
 
 			if (a.hasOwnProperty(key)
-				&& typeof sourceProperty !== 'undefined'
+				&& sourcePropertyType !== 'undefined'
 				&& sourceProperty !== null
-				&& typeof targetProperty !== 'undefined'
+				&& targetPropertyType !== 'undefined'
 				&& targetProperty !== null
-				&& typeof targetProperty !== typeof sourceProperty
+				&& targetPropertyType !== sourcePropertyType
 			) {
-				C.w('Overriding old property of DIFFERENT type:',
+				C.w('Overwirting old property with a new one of DIFFERENT type:',
 					'\n\t key: "'+key+'",',
-					'\n\t old type: "'+(typeof targetProperty)+'",',
-					'\n\t new type: "'+(typeof sourceProperty)+'"'
+					'\n\t old type: "'+(targetPropertyType)+'",',
+					'\n\t new type: "'+(sourcePropertyType)+'"'
 				);
 			}
 
 
 
-			if (sourceProperty instanceof Node
-				|| sourceProperty === window
-				|| sourceProperty === null
-				|| typeof sourceProperty !== 'object'
-			) {
+			if (sourcePropertyIsAnArray && targetPropertyIsAnArray && arrayTransferingMode===3) {
+				a[key] = sourceProperty.concat(targetProperty);
+				continue;
+			}
+
+
+
+			var currentSourcePropertyNeedToTravelRecursively =
+				(
+						(sourcePropertyIsAnArray               && arrayTransferingMode !==0)
+					||  (sourcePropertyIsAnObjectButNotAnArray && objectTransferingMode!==0)
+				)
+				&& sourceProperty !== null
+				&& sourceProperty !== window
+				&& !(sourceProperty instanceof Node)
+				;
+
+
+			if (!currentSourcePropertyNeedToTravelRecursively) {
 				a[key] = sourceProperty;
 				continue;
 			}
 
+			// Since there is a "continue" statement above nested in the if clause,
+			// below are all for "currentSourcePropertyNeedToTravelRecursively === true".
 
 
-			if (Array.isArray(sourceProperty)) {
-				if (arrayTransferingMode === 0 || (arrayTransferingMode ===3 && objectTransferingMode === 0)) {
-					a[key] = sourceProperty;
+
+			if (shouldProceedSafeReferencingCheck) {
+				var sourcePropertyHasBeenTravelled = false;
+				for (var i=0; i<allTravelledReferences.length; i++) {
+					var travelRecord = allTravelledReferences[i];
+					if (sourceProperty === travelRecord.sourceProperty) {
+						sourcePropertyHasBeenTravelled = true;
+						break;
+					}
+				}
+
+				if (sourcePropertyHasBeenTravelled) {
+					a[key] = travelRecord.targetProperty;
+					continue;
+				}
+			}
+
+			// Again, there is a "continue" statement above nested in the if clause,
+			// which means below are all for "sourcePropertyHasBeenTravelled === false".
+
+
+
+
+			if (sourcePropertyIsAnArray) {
+				var copyOfSourceArray = getCopyOfAnArray(
+					sourceProperty,
+					aaaaaa,
+					safeReferencingCheckSwithOkToken
+				);
+
+				if (!targetPropertyIsAnArray) {
+					a[key] = copyOfSourceArray;
 					continue;
 				}
 
-				var deeplyCopyHost = mergeBIntoA({}, sourceProperty, objectTransferingMode, arrayTransferingMode);
-				if (!Array.isArray(targetProperty)) {
-					a[key] = [].concat(sourceProperty); // make sure we use a duplication
-				} else {
-					a[key] = targetProperty.concat(sourceProperty);
+				// After the "continue" statement above,
+				// now both source and target properties are arrays.
+
+				if (arrayTransferingMode===1) {
+					a[key] = copyOfSourceArray;
 				}
+
+				if (arrayTransferingMode===2) {
+					a[key] = sourceProperty.concat(copyOfSourceArray);
+				}
+
 				continue;
-			} else if (typeof sourceProperty === 'object') {
-				if (objectTransferingMode===0) {
-					a[key] = sourceProperty;
+			}
+
+
+
+			if (sourcePropertyIsAnObjectButNotAnArray) {
+
+				if (!targetPropertyIsAnObjectButNotAnArray || objectTransferingMode===1) {
+					var copyOfSourceObject = mergeBIntoA(
+						{},
+						sourceProperty,
+						1,
+						arrayTransferingMode,
+						safeReferencingCheckSwithOkToken
+					);
+					a[key] = copyOfSourceObject;
 					continue;
 				}
 
+				if (objectTransferingMode===2) {
+					a[key] = mergeBIntoA(
+						targetProperty,
+						sourceProperty,
+						2,
+						arrayTransferingMode,
+						safeReferencingCheckSwithOkToken
+					);
+				}
 
+				continue;
 			}
 
 
 			// Now the sourceProperty can ONLY be object, let's check out whether localProperty is also an object
-			if (a[key] === null || typeof a[key] !== 'object') {
-				a[key] = {};
-			}
+			// if (a[key] === null || typeof a[key] !== 'object') {
+			// 	a[key] = {};
+			// }
 
-			// recursively migrate properties
-			mergeBIntoA(a[key], sourceProperty, objectTransferingMode, arrayTransferingMode);
+			// recursively transfer properties
+			// mergeBIntoA(a[key], sourceProperty, objectTransferingMode, arrayTransferingMode);
 		}
+
+
+
+
+		if (thisIsTopLevelInvocation) {
+			delete safeReferencingCheckTokenHost[safeReferencingCheckToken];
+		}
+
+
 
 		return a;
 	}

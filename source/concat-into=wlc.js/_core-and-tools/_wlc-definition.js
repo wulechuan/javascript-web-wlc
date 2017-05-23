@@ -1,8 +1,26 @@
 (function (factory) {
 	window.wlc = factory();
 })(function () {
-	var wlc = {};
-	var nilFunction = function () {};
+	function nilFunction() {}
+
+	function generateAUniqueTokenUnder(tokenHost, prefix) {
+		function doGenerate(prefix) {
+			return prefix + [
+				Date.now(),
+				Math.random().toFixed(10).slice(2)
+			].join('-');
+		}
+
+		prefix = typeof prefix === 'string' ? prefix : '';
+		if (prefix) prefix = prefix.replace(/\-+$/, '') + '-';
+
+		var token = doGenerate(prefix);
+		while (tokenHost[token]) {
+			token = doGenerate(prefix);
+		}
+
+		return token;
+	}
 
 	var console2 = (function defineShortcutsForConsoleMethods() {
 		var methodsToProcess = {
@@ -32,9 +50,15 @@
 		return c;
 	})();
 
+	var utilities = {};
+
+	utilities.nilFunction = nilFunction;
+	utilities.generateAUniqueTokenUnder = generateAUniqueTokenUnder;
+
+	var wlc = {};
 
 	wlc.console = console2;
-
+	wlc.utilities = utilities;
 
 	return wlc;
 });
