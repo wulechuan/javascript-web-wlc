@@ -260,49 +260,45 @@
 
 
 
+			var copyOfSourceProperty;
+
+
 			if (sourcePropertyIsAnArray) {
-				var copyOfSourceArray = getCopyOfAnArray(
+				copyOfSourceProperty = generateACopyOfAnArray(
 					sourceProperty,
-					aaaaaa,
+					false,
+					objectTransferingMode,
 					safeReferencingCheckSwithOkToken
 				);
 
+
 				if (!targetPropertyIsAnArray) {
-					a[key] = copyOfSourceArray;
-					continue;
+					a[key] = copyOfSourceProperty;
+				} else {
+					// Now both source and target properties are arrays.
+					// Note that arrayTransferingMode===3 has been processed way above.
+
+					if (arrayTransferingMode===1) {
+						a[key] = copyOfSourceProperty;
+					}
+
+					if (arrayTransferingMode===2) {
+						a[key] = sourceProperty.concat(copyOfSourceProperty);
+					}
 				}
-
-				// After the "continue" statement above,
-				// now both source and target properties are arrays.
-
-				if (arrayTransferingMode===1) {
-					a[key] = copyOfSourceArray;
-				}
-
-				if (arrayTransferingMode===2) {
-					a[key] = sourceProperty.concat(copyOfSourceArray);
-				}
-
-				continue;
 			}
 
-
-
 			if (sourcePropertyIsAnObjectButNotAnArray) {
-
 				if (!targetPropertyIsAnObjectButNotAnArray || objectTransferingMode===1) {
-					var copyOfSourceObject = mergeBIntoA(
+					copyOfSourceProperty = mergeBIntoA(
 						{},
 						sourceProperty,
 						1,
 						arrayTransferingMode,
 						safeReferencingCheckSwithOkToken
 					);
-					a[key] = copyOfSourceObject;
-					continue;
-				}
-
-				if (objectTransferingMode===2) {
+					a[key] = copyOfSourceProperty;
+				} else if (objectTransferingMode===2) {
 					a[key] = mergeBIntoA(
 						targetProperty,
 						sourceProperty,
@@ -311,9 +307,13 @@
 						safeReferencingCheckSwithOkToken
 					);
 				}
-
-				continue;
 			}
+
+
+			allTravelledReferences.push({
+				sourceProperty: sourceProperty,
+				targetProperty: a[key]
+			});
 
 
 			// Now the sourceProperty can ONLY be object, let's check out whether localProperty is also an object
@@ -344,7 +344,7 @@
 	 * @param {?boolean} shouldUseReferenceOfNestedArrays 
 	 * @param {?number} objectTransferingMode 
 	 */
-	function getCopyOfAnArray(sourceArray, shouldUseReferenceOfNestedArrays, objectTransferingMode) {
+	function generateACopyOfAnArray(sourceArray, shouldUseReferenceOfNestedArrays, objectTransferingMode) {
 		if (!Array.isArray(sourceArray)) {
 			C.e('Non-array object passed in.');
 			return undefined;
