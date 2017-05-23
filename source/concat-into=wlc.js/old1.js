@@ -1,4 +1,4 @@
-/* old tianxialiangc wlcjs */
+/* old tianxialiangc and LLY wlcjs */
 
 /* global
 	jQuery zepto qS qSA add isDomNode isDomElement isDom prepare
