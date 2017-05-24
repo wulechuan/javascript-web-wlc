@@ -226,14 +226,13 @@
 				continue;
 			}
 
-			// Since there is a "continue" statement above nested in the if clause,
-			// below are all for "currentSourcePropertyNeedToTravelRecursively === true".
-
-
 			if (sourcePropertyIsAnArray && targetPropertyIsAnArray && arrayTransferingMode===3) {
 				a[key] = sourceProperty.concat(targetProperty);
 				continue;
 			}
+
+			// Since there are "continue" statements nested in the if clauses above,
+			// below are all for "currentSourcePropertyNeedToTravelRecursively === true".
 
 
 			var sourcePropertyHasBeenTravelled = false;
@@ -260,13 +259,14 @@
 				});
 			}
 
-			// Again, there is a "continue" statement above nested in the if clause,
+			// Again, there is a "continue" statement nested in the if clause above,
 			// which means below are all for "sourcePropertyHasBeenTravelled === false".
 
 
 
 
 			var copyOfSourceProperty;
+			var targetPropertyIsNotReusable = false;
 
 
 			if (sourcePropertyIsAnArray) {
@@ -305,6 +305,8 @@
 					);
 					a[key] = copyOfSourceProperty;
 				} else if (objectTransferingMode===2) {
+					targetPropertyIsNotReusable = true;
+
 					a[key] = mergeBIntoA(
 						targetProperty,
 						sourceProperty,
@@ -316,7 +318,6 @@
 			}
 
 
-			// "targetPropertyIsNotReusable" to be implemented
 			if (shouldProceedLoopReferencingCheck && targetPropertyIsNotReusable) {
 				allTravelledReferences.pop();
 			}
@@ -355,7 +356,7 @@
 	 * @author 吴乐川 <wulechuan@live.com>
 	 * @param {!array} sourceArray 
 	 * @param {?boolean} shouldUseReferenceOfNestedArrays 
-	 * @param {?number} objectTransferingMode 
+	 * @param {?(number|boolean)} objectTransferingMode 
 	 */
 	function generateACopyOfAnArray(sourceArray, shouldUseReferenceOfNestedArrays, objectTransferingMode) {
 		if (!Array.isArray(sourceArray)) {
