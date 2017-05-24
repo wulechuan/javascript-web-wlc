@@ -147,12 +147,12 @@
 		}
 
 	
-		var shouldProceedLoopReferencingCheck = !!loopReferencingCheckSwithOrToken;
+		var shouldProceedSafeReferencingCheck = !!loopReferencingCheckSwithOrToken;
 		var loopReferencingCheckTokenHost = recursivelyTravelledReferencesHost;
 		var loopReferencingCheckToken;
 		var allTravelledReferences;
 		var thisIsTopLevelInvocation = false;
-		if (shouldProceedLoopReferencingCheck) {
+		if (shouldProceedSafeReferencingCheck) {
 			if (typeof loopReferencingCheckSwithOrToken === 'string') {
 				loopReferencingCheckToken = loopReferencingCheckSwithOrToken;
 			} else {
@@ -238,7 +238,7 @@
 
 			var sourcePropertyHasBeenTravelled = false;
 			var i, travelRecord;
-			if (shouldProceedLoopReferencingCheck) {
+			if (shouldProceedSafeReferencingCheck) {
 				for (i=0; i<allTravelledReferences.length; i++) {
 					travelRecord = allTravelledReferences[i];
 					if (sourceProperty === travelRecord.sourceProperty) {
@@ -317,7 +317,7 @@
 
 
 			// "targetPropertyIsNotReusable" to be implemented
-			if (shouldProceedLoopReferencingCheck && targetPropertyIsNotReusable) {
+			if (shouldProceedSafeReferencingCheck && targetPropertyIsNotReusable) {
 				allTravelledReferences.pop();
 			}
 		}
@@ -327,11 +327,11 @@
 		/***
 		 * The condition below can use a shortcut,
 		 * because "thisIsTopLevelInvocation" is never true
-		 * if "shouldProceedLoopReferencingCheck" is false.
+		 * if "shouldProceedSafeReferencingCheck" is false.
 		 * In another word, if "thisIsTopLevelInvocation" is true,
-		 * then the "shouldProceedLoopReferencingCheck" must also be true.
+		 * then the "shouldProceedSafeReferencingCheck" must also be true.
 		 */
-		if (/* shouldProceedLoopReferencingCheck && */ thisIsTopLevelInvocation) {
+		if (/* shouldProceedSafeReferencingCheck && */ thisIsTopLevelInvocation) {
 			for (i=0; i<allTravelledReferences.length; i++) {
 				travelRecord = allTravelledReferences[i];
 				var propertyKey = travelRecord.propertyKey;
