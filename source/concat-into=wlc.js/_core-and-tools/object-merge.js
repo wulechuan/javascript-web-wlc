@@ -210,13 +210,6 @@
 
 
 
-			if (sourcePropertyIsAnArray && targetPropertyIsAnArray && arrayTransferingMode===3) {
-				a[key] = sourceProperty.concat(targetProperty);
-				continue;
-			}
-
-
-
 			var currentSourcePropertyNeedToTravelRecursively =
 				(
 						(sourcePropertyIsAnArray               && arrayTransferingMode !==0)
@@ -236,6 +229,11 @@
 			// Since there is a "continue" statement above nested in the if clause,
 			// below are all for "currentSourcePropertyNeedToTravelRecursively === true".
 
+
+			if (sourcePropertyIsAnArray && targetPropertyIsAnArray && arrayTransferingMode===3) {
+				a[key] = sourceProperty.concat(targetProperty);
+				continue;
+			}
 
 
 			var sourcePropertyHasBeenTravelled = false;
