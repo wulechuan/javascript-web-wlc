@@ -91,31 +91,31 @@
 	function mergeBIntoA(a, b, objectTransferingMode, arrayTransferingMode, safeReferencingCheckSwithOkToken) {
 		if (a === b) {
 			C.e('Merging soure is the same object as the target.');
-			return;
+			return a;
 		}
 
 		if (a instanceof Node) {
 			C.e('Should NOT copy properties to a DOM Node.');
-			return;
+			return a;
 		}
 
 		if (b instanceof Node) {
 			C.e('Should NOT copy properties from a DOM Node.');
-			return;
+			return a;
 		}
 
 		if (a === window) {
 			C.e('Should NOT copy proterties to {window} object.');
-			return;
+			return a;
 		}
 		if (b === window) {
 			C.e('Should NOT copy proterties from {window} object.');
-			return;
+			return a;
 		}
 
 		if (!b || typeof b !== 'object') {
 			C.e('Merging source is NOT an object.');
-			return;
+			return a;
 		}
 
 		if (!a || typeof a !== 'object') {
