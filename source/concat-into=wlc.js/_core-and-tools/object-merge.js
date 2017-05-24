@@ -266,7 +266,7 @@
 
 
 			var copyOfSourceProperty;
-			var targetPropertyIsNotReusable = false;
+			var resultOfTargetPropertyIsNotReusable = false;
 
 
 			if (sourcePropertyIsAnArray) {
@@ -305,7 +305,7 @@
 					);
 					a[key] = copyOfSourceProperty;
 				} else if (objectTransferingMode===2) {
-					targetPropertyIsNotReusable = true;
+					resultOfTargetPropertyIsNotReusable = true;
 
 					a[key] = mergeBIntoA(
 						targetProperty,
@@ -318,7 +318,7 @@
 			}
 
 
-			if (shouldProceedLoopReferencingCheck && targetPropertyIsNotReusable) {
+			if (shouldProceedLoopReferencingCheck && resultOfTargetPropertyIsNotReusable) {
 				allTravelledReferences.pop();
 			}
 		}
