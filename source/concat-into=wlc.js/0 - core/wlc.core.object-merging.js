@@ -1,23 +1,39 @@
 /**
+ * @method mergeBIntoA
+ * @memberof wlc.core
  * @author 吴乐川 <wulechuan@live.com>
- * @module object-merge
  */
-(function (factory) {
+(function (constructIt) {
 	var publicMethodName = 'mergeBIntoA';
-	var loggingPrefix = 'Utilities > object > merging';
-	var wlc = window.wlc;
-	var utilities = wlc.utilities;
-	var generateAUniqueTokenUnder = utilities.generateAUniqueTokenUnder;
+	var loggingPrefix = 'wlc.core.object-merging';
 
-	var console = window.console; // new wlc.Console(loggingPrefix);
+
+
+
+
+
+
+
+	var global = global || window;
+	var core = global.wlc && global.wlc.core;
+	if (!core) {
+		throw ReferenceError('The "wlc.core" is not defined.');
+	}
+
+	var generateAUniqueTokenUnder = core.generateAUniqueTokenUnder;
+
+	var console = window.console; // new core.Console(loggingPrefix);
 	if (console === window.console) {
 		console.l = console.log;
 		console.w = console.warn;
 		console.e = console.error;
 	}
 
-	utilities[publicMethodName] = factory(generateAUniqueTokenUnder, console);
-})(function (generateAUniqueTokenUnder, C) {
+	core[publicMethodName] = constructIt(generateAUniqueTokenUnder, console);
+
+
+
+})(function constructIt(generateAUniqueTokenUnder, C) {
 	var recursivelyTravelledReferencesHost = {};
 
 	Object.prototype.mergePropertiesFrom = function() {
