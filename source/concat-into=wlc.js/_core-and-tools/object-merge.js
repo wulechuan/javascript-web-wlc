@@ -3,13 +3,20 @@
  * @module object-merge
  */
 (function (factory) {
+	var publicMethodName = 'mergeBIntoA';
+	var loggingPrefix = 'Utilities > object > merging';
 	var wlc = window.wlc;
 	var utilities = wlc.utilities;
+	var generateAUniqueTokenUnder = utilities.generateAUniqueTokenUnder;
 
-	utilities.mergeBIntoA = factory(
-		utilities.generateAUniqueTokenUnder,
-		window.console // new wlc.Console('Utilities > object > merging')
-	);
+	var console = window.console; // new wlc.Console(loggingPrefix);
+	if (console === window.console) {
+		console.l = console.log;
+		console.w = console.warn;
+		console.e = console.error;
+	}
+
+	utilities[publicMethodName] = factory(generateAUniqueTokenUnder, console);
 })(function (generateAUniqueTokenUnder, C) {
 	var recursivelyTravelledReferencesHost = {};
 
@@ -89,18 +96,13 @@
 	 * 					of objects and arrays that are travelled during current root invocation.
 	 */
 	function mergeBIntoA(a, b, objectTransferingMode, arrayTransferingMode, loopReferencingCheckSwithOrToken) {
-		if (a === b) {
-			C.e('Merging soure is the same object as the target.');
-			return a;
-		}
-
 		if (a instanceof Node) {
-			C.e('Should NOT copy properties to a DOM Node.');
+			C.e('Should NOT copy properties to a DOM node.');
 			return a;
 		}
 
 		if (b instanceof Node) {
-			C.e('Should NOT copy properties from a DOM Node.');
+			C.e('Should NOT copy properties from a DOM node.');
 			return a;
 		}
 
@@ -115,6 +117,19 @@
 
 		if (!b || typeof b !== 'object') {
 			C.e('Merging source is NOT an object.');
+			return a;
+		} else if (Array.isArray(b)) {
+			C.e('Merging source should NOT be an array.');
+			return a;
+		}
+
+		if (Array.isArray(a)) {
+			C.e('Merging target should NOT be an array.');
+			return a;
+		}
+
+		if (a === b) {
+			C.e('Merging soure is the same object as the target.');
 			return a;
 		}
 
@@ -182,13 +197,13 @@
 			var sourcePropertyIsAnArray = Array.isArray(sourceProperty);
 			var targetPropertyIsAnArray = Array.isArray(targetProperty);
 
-			var sourcePropertyIsAnObjectButNotAnArray =
+			var sourcePropertyIsNarrowSenseObject =
 					!!sourcePropertyType
 				&&  sourcePropertyType === 'object'
 				&& !sourcePropertyIsAnArray
 				;
 
-			var targetPropertyIsAnObjectButNotAnArray =
+			var targetPropertyIsNarrowSenseObject =
 					!!targetPropertyType
 				&&  targetPropertyType === 'object'
 				&& !targetPropertyIsAnArray
@@ -212,8 +227,8 @@
 
 			var currentSourcePropertyNeedToTravelRecursively =
 				(
-						(sourcePropertyIsAnArray               && arrayTransferingMode !==0)
-					||  (sourcePropertyIsAnObjectButNotAnArray && objectTransferingMode!==0)
+						(sourcePropertyIsAnArray           && arrayTransferingMode !==0)
+					||  (sourcePropertyIsNarrowSenseObject && objectTransferingMode!==0)
 				)
 				&& sourceProperty !== null
 				&& sourceProperty !== window
@@ -294,8 +309,8 @@
 				}
 			}
 
-			if (sourcePropertyIsAnObjectButNotAnArray) {
-				if (!targetPropertyIsAnObjectButNotAnArray || objectTransferingMode===1) {
+			if (sourcePropertyIsNarrowSenseObject) {
+				if (!targetPropertyIsNarrowSenseObject || objectTransferingMode===1) {
 					copyOfSourceProperty = mergeBIntoA(
 						{},
 						sourceProperty,
@@ -327,10 +342,10 @@
 
 		/***
 		 * The condition below can use a shortcut,
-		 * because "thisIsTopLevelInvocation" is never true
+		 * because "thisIsTopLevelInvocation" will never be true,
 		 * if "shouldProceedLoopReferencingCheck" is false.
-		 * In another word, if "thisIsTopLevelInvocation" is true,
-		 * then the "shouldProceedLoopReferencingCheck" must also be true.
+		 * In other words, if "thisIsTopLevelInvocation" is true,
+		 * then the "shouldProceedLoopReferencingCheck" is for sure to be true.
 		 */
 		if (/* shouldProceedLoopReferencingCheck && */ thisIsTopLevelInvocation) {
 			for (i=0; i<allTravelledReferences.length; i++) {
