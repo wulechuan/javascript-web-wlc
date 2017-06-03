@@ -1,6 +1,6 @@
 /**
 * The wlc.utilities namespace, aka the object.
-  * @namespace wlc.utilities
+ * @namespace wlc.utilities
  * @memberof wlc
  * @author 吴乐川 <wulechuan@live.com>
  */
