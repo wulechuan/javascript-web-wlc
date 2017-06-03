@@ -4,7 +4,7 @@
  * @memberof wlc
  * @author 吴乐川 <wulechuan@live.com>
  */
-(function (constructIt) {
+(function (constructWhatWeWant) {
 	var thisNameSpace = 'core';
 
 
@@ -25,11 +25,11 @@
 		throw ReferenceError('The global "wlc" object is not defined.');
 	}
 
-	wlc[thisNameSpace] = constructIt();
+	wlc[thisNameSpace] = constructWhatWeWant();
 
 
 
-})(function constructIt() {
+})(function constructWhatWeWant() {
 	var core = {};
 
 	core.nilFunction = nilFunction;
@@ -39,11 +39,20 @@
 
 
 
-
+	/**
+	 * The nil function, often named "noop" in other popular libraries.
+	 * @method nilFunction
+	 * @memberof! wlc.core
+	 * @author 吴乐川 <wulechuan@live.com>
+	 */
 	function nilFunction() {}
 
+
+
+
+
 	/**
-	 * @function generateAUniqueTokenUnder
+	 * @method generateAUniqueTokenUnder
 	 * @memberof! wlc.core
 	 * @author 吴乐川 <wulechuan@live.com>
 	 * @param {!object} tokenHost 

@@ -4,7 +4,7 @@
  * @namespace wlc
  * @author 吴乐川 <wulechuan@live.com>
  */
-(function (constructIt) {
+(function (constructWhatWeWant) {
 	var wlcGlobalNameSpace = 'wlc';
 
 
@@ -20,7 +20,7 @@
 
 
 	var global = global || window;
-	global[wlcGlobalNameSpace] = constructIt();
+	global[wlcGlobalNameSpace] = constructWhatWeWant();
 
 
 

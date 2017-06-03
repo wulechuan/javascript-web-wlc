@@ -3,7 +3,7 @@
  * @memberof wlc.core
  * @author 吴乐川 <wulechuan@live.com>
  */
-(function (constructIt) {
+(function (constructWhatWeWant) {
 	var publicMethodName = 'mergeBIntoA';
 	var loggingPrefix = 'wlc.core.object-merging';
 
@@ -29,11 +29,11 @@
 		console.e = console.error;
 	}
 
-	core[publicMethodName] = constructIt(generateAUniqueTokenUnder, console);
+	core[publicMethodName] = constructWhatWeWant(generateAUniqueTokenUnder, console);
 
 
 
-})(function constructIt(generateAUniqueTokenUnder, C) {
+})(function constructWhatWeWant(generateAUniqueTokenUnder, C) {
 	var recursivelyTravelledReferencesHost = {};
 
 	Object.prototype.mergePropertiesFrom = function() {
