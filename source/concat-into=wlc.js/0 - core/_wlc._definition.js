@@ -13,18 +13,12 @@
 
 
 
-
-
-
-
-
-
 	var global = global || window;
 	global[wlcGlobalNameSpace] = constructWhatWeWant();
 
 
 
-})(function () {
+})(function constructWhatWeWant() {
 	/**
 	 * @global
 	 */
