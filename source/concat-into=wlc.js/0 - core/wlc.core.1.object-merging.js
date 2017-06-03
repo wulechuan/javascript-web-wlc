@@ -1,12 +1,14 @@
 /**
- * @method mergeBIntoA
+ * Define some methods for merging objects or arrays:
+ * 		> mergeBIntoA
+ * 		> generateACopyOfAnArray
  * @memberof wlc.core
  * @author 吴乐川 <wulechuan@live.com>
  */
 (function (constructWhatWeWant) {
-	var publicMethodName = 'mergeBIntoA';
+	var publicMethodName1 = 'mergeBIntoA';
+	var publicMethodName2 = 'generateACopyOfAnArray';
 	var loggingPrefix = 'wlc.core.object-merging';
-
 
 
 
@@ -20,16 +22,13 @@
 		throw ReferenceError('The "wlc.core" is not defined.');
 	}
 
-	var generateAUniqueTokenUnder = core.generateAUniqueTokenUnder;
+	var result = constructWhatWeWant(
+		core.generateAUniqueTokenUnder,
+		new core.Console(loggingPrefix)
+	);
 
-	var console = window.console; // new core.Console(loggingPrefix);
-	if (console === window.console) {
-		console.l = console.log;
-		console.w = console.warn;
-		console.e = console.error;
-	}
-
-	core[publicMethodName] = constructWhatWeWant(generateAUniqueTokenUnder, console);
+	core[publicMethodName1] = result.mergeBIntoA;
+	core[publicMethodName2] = result.generateACopyOfAnArray;
 
 
 
@@ -40,14 +39,21 @@
 		mergeBIntoA.apply(null, [this].concat(Array.prototype.slice(arguments)));
 	};
 
-	return mergeBIntoA;
+	return {
+		mergeBIntoA: mergeBIntoA,
+		generateACopyOfAnArray: generateACopyOfAnArray
+	};
+
+
+
+
 
 	/**
 	 * @author 吴乐川 <wulechuan@live.com>
 	 * 
 	 * @function - Merge all properties of object B into object A,
 	 * 				>	with extra options controlling the merging behaviours.
-	 * @name mergeBIntoA
+	 * @memberof window.wlc.core
 	 * 
 	 * @return {object} The original object A, or the newly created object if A was not a valid object.
 	 * @param {?object} A - Object to accept new properties.
@@ -385,6 +391,7 @@
 
 	/**
 	 * @author 吴乐川 <wulechuan@live.com>
+	 * @memberof window.wlc.core
 	 * @param {!array} sourceArray 
 	 * @param {?boolean} shouldUseReferenceOfNestedArrays 
 	 * @param {?(number|boolean)} objectTransferingMode 
