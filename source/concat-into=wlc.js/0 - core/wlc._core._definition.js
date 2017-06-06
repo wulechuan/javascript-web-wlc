@@ -19,8 +19,8 @@
 
 
 
-	var global = global || window;
-	var wlc = global.wlc;
+	var globalObject = global || window;
+	var wlc = globalObject.wlc;
 	if (!wlc) {
 		throw ReferenceError('The global "wlc" object is not defined.');
 	}
@@ -34,7 +34,7 @@
 
 	core.nilFunction = nilFunction;
 	core.generateAUniqueTokenUnder = generateAUniqueTokenUnder;
-	core.evaluateObjectAccessingPath = evaluateObjectAccessingPath;
+	core.evaluateObjectViaAccessingPath = evaluateObjectViaAccessingPath;
 	core.defineBaseProperty = defineBaseProperty;
 	core.defineUtility = defineUtility;
 
@@ -43,7 +43,7 @@
 
 
 	/**
-	 * The nil function, often named "noop" in other popular libraries.
+	 * The nil function, often named "noop" in other popular libraries or frameworks.
 	 * @method nilFunction
 	 * @memberof! wlc.core
 	 * @author 吴乐川 <wulechuan@live.com>
@@ -79,91 +79,216 @@
 	}
 
 
+	function evaluateObjectViaAccessingPath(/*path, omissiblePrefixOfPath, shouldNotTrimKeys*/) {
+		var result = {
+			evaluationFailed: false,
+			value: undefined
+		};
 
-	function evaluateObjectAccessingPath(path, omitablePrefixOfPath, shouldNotTrimKeys) {
-		if (typeof path !== 'string') {
+		var evaluatedFullPathSegments = evaluateObjectFullAccessingPath.apply(null, arguments);
+
+		if (!evaluatedFullPathSegments) {
+			result.evaluationFailed = true;
+			return result;
+		}
+
+		console.log(evaluatedFullPathSegments.join('.'));
+
+		var globalObject = typeof window === 'object' ? window : global;
+		var evaluatedValue = globalObject;
+		var pathDepth = evaluatedFullPathSegments.length;
+
+		var i, key;
+		for (i = 1; i < pathDepth; i++) {
+			key = evaluatedFullPathSegments[i];
+			evaluatedValue = evaluatedValue[key];
+			if (evaluatedValue === null || typeof evaluatedValue === 'undefined') {
+				if (i < pathDepth-1) {
+					result.evaluationFailed = true;
+					return result;
+				}
+			}
+		}
+
+		result.value = evaluatedValue;
+
+		return result;
+	}
+
+	function evaluateObjectFullAccessingPath(pathToCheck, omissiblePrefixOfPath, shouldNotTrimKeys) {
+		if (typeof pathToCheck !== 'string') {
 			throw TypeError('The "path" must be a string, e.g. "wlc.core".');
 		}
 
 		var shouldTrimKeys = !shouldNotTrimKeys;
-
-		if (typeof omitablePrefixOfPath !== 'string') {
+		if (typeof omissiblePrefixOfPath !== 'string') {
 			if (arguments.length === 2) {
-				shouldTrimKeys = !omitablePrefixOfPath;
+				shouldTrimKeys = !omissiblePrefixOfPath;
 			}
-			omitablePrefixOfPath = null;
-		} else {
-			if (shouldTrimKeys) {
-				omitablePrefixOfPath = omitablePrefixOfPath.trim();
-			}
+			omissiblePrefixOfPath = null;
+		// } else {
+		// 	if (shouldTrimKeys) {
+		// 		omissiblePrefixOfPath = omissiblePrefixOfPath.trim();
+		// 	}
 		}
 
-		var evaluatedObject;
-		if (!omitablePrefixOfPath) {
-			evaluatedObject = global || window;
-		} else {
-			evaluatedObject = evaluateObjectAccessingPath(omitablePrefixOfPath, null, !shouldTrimKeys);
-			if (!evaluatedObject) {
-				return null;
-			}
-		}
 
+		// var globalObject = typeof window === 'object' ? window : global;
+		var globalObjectIsWindow = typeof window === 'object';
+		var globalObjectName = globalObjectIsWindow ? 'window' : 'global';
 
 		var regExpLeadingWindowSequenceCS;
 		var regExpLeadingWindowSequenceCI;
 		var regExpLeadingGlobalSequenceCS;
 		var regExpLeadingGlobalSequenceCI;
 		if (shouldTrimKeys) {
-			regExpLeadingWindowSequenceCS = /^(\s*window\s*\.)*\s*/;
-			regExpLeadingWindowSequenceCI = /^(\s*window\s*\.)*\s*/i;
-			regExpLeadingGlobalSequenceCS = /^(\s*global\s*\.)*\s*/;
-			regExpLeadingGlobalSequenceCI = /^(\s*global\s*\.)*\s*/i;
+			regExpLeadingWindowSequenceCS = /^window(\.window)*\.?/;
+			regExpLeadingWindowSequenceCI = /^window(\.window)*\.?/i;
+			regExpLeadingGlobalSequenceCS = /^global(\.global)*\.?/;
+			regExpLeadingGlobalSequenceCI = /^global(\.global)*\.?/i;
 		} else {
-			regExpLeadingWindowSequenceCS = /^(window\.)*/;
-			regExpLeadingWindowSequenceCI = /^(window\.)*/i;
-			regExpLeadingGlobalSequenceCS = /^(global\.)*?/;
-			regExpLeadingGlobalSequenceCI = /^(global\.)*?/i;
-
+			regExpLeadingWindowSequenceCS = /^\s*window\s*(\.\s*window\s*)*\.?\s*/;
+			regExpLeadingWindowSequenceCI = /^\s*window\s*(\.\s*window\s*)*\.?\s*/i;
+			regExpLeadingGlobalSequenceCS = /^\s*global\s*(\.\s*global\s*)*\.?\s*/;
+			regExpLeadingGlobalSequenceCI = /^\s*global\s*(\.\s*global\s*)*\.?\s*/i;
 		}
 
 
+		var pathToCheckEvaluatedSegments;
+		var pathToCheckIsAnAbsolutePath = false;
 
-		if (shouldTrimKeys) {
-			path = path
-				.replace(/^\s+/, '')
-				.replace(/\s+$/, '')
-				.replace(/\s*\.\s*/g, '.')
+		var omissiblePrefixEvaluatedSegments = [];
+		var omissiblePrefixOfPathIsAnAbsolutePath = false;
+
+		pathToCheckEvaluatedSegments = _evaluate(pathToCheck);
+		if (pathToCheckEvaluatedSegments) {
+			pathToCheckIsAnAbsolutePath = pathToCheckEvaluatedSegments[0] === globalObjectName;
+		} else {
+			pathToCheckEvaluatedSegments = [];
+		}
+
+		if (omissiblePrefixOfPath) {
+			omissiblePrefixEvaluatedSegments = _evaluate(omissiblePrefixOfPath);
+			if (omissiblePrefixEvaluatedSegments) {
+				omissiblePrefixOfPathIsAnAbsolutePath = omissiblePrefixEvaluatedSegments[0] === globalObjectName;
+			} else {
+				omissiblePrefixEvaluatedSegments = [];
+			}
+		}
+
+
+		var evaluatedFullPathSegments;
+
+		if (!pathToCheckIsAnAbsolutePath && !omissiblePrefixOfPathIsAnAbsolutePath) {
+			evaluatedFullPathSegments = [globalObjectName]
+				.concat(omissiblePrefixEvaluatedSegments)
+				.concat(pathToCheckEvaluatedSegments);
+		}
+		
+		if (!pathToCheckIsAnAbsolutePath && omissiblePrefixOfPathIsAnAbsolutePath) {
+			evaluatedFullPathSegments = []
+				.concat(omissiblePrefixEvaluatedSegments)
+				.concat(pathToCheckEvaluatedSegments);
+		}
+
+		if (pathToCheckIsAnAbsolutePath && omissiblePrefixOfPath && !omissiblePrefixOfPathIsAnAbsolutePath) {
+			return [];
+		}
+
+		if (pathToCheckIsAnAbsolutePath && omissiblePrefixOfPathIsAnAbsolutePath) {
+			var evaluatedPathToCheck = pathToCheckEvaluatedSegments.join('.');
+			var evaluatedPrefix = omissiblePrefixEvaluatedSegments.join('.');
+			var pathToCheckContainsPrefix = evaluatedPathToCheck.match(evaluatedPrefix)
+				&& evaluatedPathToCheck.length > evaluatedPrefix.length;
+
+			if (!pathToCheckContainsPrefix) {
+				return [];
+			}
+
+			evaluatedFullPathSegments = pathToCheckEvaluatedSegments;
+		}
+
+		return evaluatedFullPathSegments;
+
+
+		function _evaluate(path) {
+			var rawPath = path; // a backup just for logging;
+			var loggingMessage = '';
+
+			if (shouldTrimKeys) {
+				path = path
+					.replace(/^\s+/, '')
+					.replace(/\s+$/, '')
+					.replace(/\s*\.\s*/g, '.')
+					;
+			}
+
+
+			// A path starts or ends with a dot is illegal.
+			if (path.match(/^\./) || path.match(/\.$/)) {
+				loggingMessage = 'Invalid string is provided. which is "'+path+'".';
+				// throw RangeError(loggingMessage);
+				console.error(loggingMessage);
+				return false;
+			}
+
+
+			// Two or more continous dots meaning there are keys that are empty strings.
+			if (path.match(/\.{2,}/)) {
+				console && console.warn(
+					'At least one empty-string-keys is among provided keys,',
+					'which although is legal but weird.',
+					'Keep an eye on it.'
+				);
+			}
+
+
+			var leadingKeyIsWindow = path.match(regExpLeadingWindowSequenceCS);
+			var leadingKeyIsGlobal = path.match(regExpLeadingGlobalSequenceCS);
+			var leadingGlobalVarNameMatchingResult = leadingKeyIsWindow || leadingKeyIsGlobal;
+
+			if (   (leadingKeyIsWindow && !globalObjectIsWindow)
+				|| (leadingKeyIsGlobal &&  globalObjectIsWindow)
+			) {
+				loggingMessage =
+					'Invalid string is provided.'+
+					' It starts with "'+leadingGlobalVarNameMatchingResult[0]+'"'+
+					' while the actual global object is "'+globalObjectName+'"'
 				;
-		}
+				// throw RangeError(loggingMessage);
+				console.error(loggingMessage);
+				return false;
+			}
 
-		if (path.match(/^\s*$/) || path.match(regExpForWeirdTerms)) {
-			throw RangeError(
-				'Invalid string for "path" argument.'+
-				'It\'s "'+path+'".'
-			);
-		}
+			var evaluatedSegments = [];
+			if (leadingGlobalVarNameMatchingResult) {
+				path = path.slice(leadingGlobalVarNameMatchingResult[0].length);
+				evaluatedSegments.push(globalObjectName);
+			}
 
-		if (path.match(/\.{2,}/)) {
-			console && console.warn(
-				'An empty string key is provided,',
-				'which although is legal but weird.'
-			);
-		}
+			var leadingKeyLooksLikeWindow = path.match(regExpLeadingWindowSequenceCI);
+			var leadingKeyLooksLikeGlobal = path.match(regExpLeadingGlobalSequenceCI);
+			// var leadingGlobalVarNameMatchingResult2 = leadingKeyLooksLikeWindow || leadingKeyLooksLikeGlobal;
 
-		var propertyKeySequence = path.split('.');
-		var key0 = propertyKeySequence[0];
-		if (key0.match(regExpForGlobalVarCS)) {
-			propertyKeySequence.shift();
-			key0 = propertyKeySequence[0];
-		} else if (key0.match(regExpForGlobalVarCI)) {
-			console && console.warn(
-				'The first term(aka key), matchs either "global" or "window",',
-				'but is incorrect case.',
-				'It will be treated as a non-global reference.'
-			);
-		}
+			if (   (leadingKeyLooksLikeWindow &&  globalObjectIsWindow)
+				|| (leadingKeyLooksLikeGlobal && !globalObjectIsWindow)
+			) {
+				console && console.warn(
+					'The leading segments of "'+rawPath+'" contain some key(s)',
+					'that each looks like the global object (the "'+globalObjectName+')',
+					'but is in an incorrect lettle case.',
+					'These key(s) each will be treated as a non-global reference.',
+					'Keep an eye on that.'
+				);
+			}
 
-		console && console.log(propertyKeySequence);
+			var propertyKeySequence = path.split('.');
+
+			console && console.log(propertyKeySequence);
+			evaluatedSegments = evaluatedSegments.concat(propertyKeySequence);
+
+			return evaluatedSegments;
+		}
 	}
 
 	function defineBaseProperty(propertyName, propertyFactory) {
@@ -175,7 +300,7 @@
 	}
 
 	function defineSometing(hostObjectPath, shouldNotTrimKeysInHostObjectPath, propertyNameToDefine, propertyFactory) {
-		var result = evaluateObjectAccessingPath();
+		var result = evaluateObjectViaAccessingPath();
 		if (!result) {
 			throw ReferenceError('');
 		}
