@@ -19,7 +19,11 @@
 
 
 
-	var globalObject = global || window;
+	var globalObject = typeof window === 'object' ? window : typeof global === 'object' ? global : null;
+	if (!globalObject) {
+		throw ReferenceError('Global object is not found.');
+	}
+
 	var wlc = globalObject.wlc;
 	if (!wlc) {
 		throw ReferenceError('The global "wlc" object is not defined.');
@@ -34,7 +38,8 @@
 
 	core.nilFunction = nilFunction;
 	core.generateAUniqueTokenUnder = generateAUniqueTokenUnder;
-	core.evaluateObjectViaAccessingPath = evaluateObjectViaAccessingPath;
+	core.evaluateObjectFullAccessingPath = evaluateObjectFullAccessingPath;
+	core.evaluateValueViaAccessingPath = evaluateValueViaAccessingPath;
 	core.defineBaseProperty = defineBaseProperty;
 	core.defineUtility = defineUtility;
 
@@ -79,11 +84,17 @@
 	}
 
 
-	function evaluateObjectViaAccessingPath(/*path, omissiblePrefixOfPath, shouldNotTrimKeys*/) {
+	function evaluateValueViaAccessingPath(/*path, omissiblePrefixOfPath, shouldNotTrimKeys*/) {
 		var result = {
 			evaluationFailed: false,
 			value: undefined
 		};
+
+		var globalObject = typeof window === 'object' ? window : typeof global === 'object' ? global : null;
+		if (!globalObject) {
+			result.evaluationFailed = true;
+			return result;
+		}
 
 		var evaluatedFullPathSegments = evaluateObjectFullAccessingPath.apply(null, arguments);
 
@@ -94,7 +105,7 @@
 
 		console.log(evaluatedFullPathSegments.join('.'));
 
-		var globalObject = typeof window === 'object' ? window : global;
+
 		var evaluatedValue = globalObject;
 		var pathDepth = evaluatedFullPathSegments.length;
 
@@ -191,13 +202,21 @@
 				.concat(pathToCheckEvaluatedSegments);
 		}
 
-		if (pathToCheckIsAnAbsolutePath && omissiblePrefixOfPath && !omissiblePrefixOfPathIsAnAbsolutePath) {
-			return [];
+		console.log('here', omissiblePrefixOfPath, pathToCheckEvaluatedSegments[0], pathToCheckIsAnAbsolutePath, !omissiblePrefixOfPathIsAnAbsolutePath);
+		if (pathToCheckIsAnAbsolutePath && !omissiblePrefixOfPathIsAnAbsolutePath) {
+			if (omissiblePrefixOfPath) {
+				omissiblePrefixEvaluatedSegments.unshift(globalObjectName);
+				omissiblePrefixOfPathIsAnAbsolutePath = true;
+			} else {
+				evaluatedFullPathSegments = pathToCheckEvaluatedSegments;
+			}
 		}
 
 		if (pathToCheckIsAnAbsolutePath && omissiblePrefixOfPathIsAnAbsolutePath) {
 			var evaluatedPathToCheck = pathToCheckEvaluatedSegments.join('.');
 			var evaluatedPrefix = omissiblePrefixEvaluatedSegments.join('.');
+			console.log(evaluatedPathToCheck, '\n'+evaluatedPrefix);
+
 			var pathToCheckContainsPrefix = evaluatedPathToCheck.match(evaluatedPrefix)
 				&& evaluatedPathToCheck.length > evaluatedPrefix.length;
 
@@ -283,8 +302,7 @@
 			}
 
 			var propertyKeySequence = path.split('.');
-
-			console && console.log(propertyKeySequence);
+			// console && console.log(propertyKeySequence);
 			evaluatedSegments = evaluatedSegments.concat(propertyKeySequence);
 
 			return evaluatedSegments;
@@ -300,7 +318,7 @@
 	}
 
 	function defineSometing(hostObjectPath, shouldNotTrimKeysInHostObjectPath, propertyNameToDefine, propertyFactory) {
-		var result = evaluateObjectViaAccessingPath();
+		var result = evaluateValueViaAccessingPath();
 		if (!result) {
 			throw ReferenceError('');
 		}

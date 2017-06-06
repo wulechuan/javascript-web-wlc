@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="source/concat-into=wlc.js/0 - core/_wlc._definition.js"></script>
+    <script src="source/concat-into=wlc.js/0 - core/wlc._core._definition.js"></script>
+    <script src="source/concat-into=wlc.js/0 - core/wlc._core.Console.js"></script>
+</head>
+<body>
+    <script>
+        var testString = 'a. b.c .length';
+        var omissible = 'a.b';
+        window.a = {
+            b: {
+                c: 'wlc'
+            }
+        }
+        wlc.core.defaultConsole.l(wlc.core.evaluateObjectFullAccessingPath(testString, omissible));
+        wlc.core.defaultConsole.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));
+    </script>
+</body>
+</html>
