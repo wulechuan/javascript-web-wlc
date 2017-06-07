@@ -38,7 +38,7 @@
 
 	core.nilFunction = nilFunction;
 	core.generateAUniqueTokenUnder = generateAUniqueTokenUnder;
-	core.evaluateObjectFullAccessingPath = evaluateObjectFullAccessingPath;
+	core.evaluateValueFullAccessingPath = evaluateValueFullAccessingPath;
 	core.evaluateValueViaAccessingPath = evaluateValueViaAccessingPath;
 	core.defineBaseProperty = defineBaseProperty;
 	core.defineUtility = defineUtility;
@@ -96,7 +96,7 @@
 			return result;
 		}
 
-		var evaluatedFullPathSegments = evaluateObjectFullAccessingPath.apply(null, arguments);
+		var evaluatedFullPathSegments = evaluateValueFullAccessingPath.apply(null, arguments);
 
 		if (!evaluatedFullPathSegments) {
 			result.evaluationFailed = true;
@@ -127,7 +127,7 @@
 		return result;
 	}
 
-	function evaluateObjectFullAccessingPath(pathToCheck, omissiblePrefixOfPath, shouldNotTrimKeys) {
+	function evaluateValueFullAccessingPath(pathToCheck, omissiblePrefixOfPath, shouldNotTrimKeys) {
 		if (typeof pathToCheck !== 'string') {
 			throw TypeError('The "path" must be a string, e.g. "wlc.core".');
 		}
