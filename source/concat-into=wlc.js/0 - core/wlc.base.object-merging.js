@@ -201,7 +201,7 @@
 				C.w(
 					'Checking referencing is turned on during recursively travelling an object.',
 					'This makes it safer to travelling an object,',
-					'however, will also slow down the process dramatically.'
+					'however, might also slow down the process dramatically.'
 				);
 			}
 
