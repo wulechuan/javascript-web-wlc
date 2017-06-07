@@ -13,8 +13,12 @@
 
 
 
-	var global = global || window;
-	global[wlcGlobalNameSpace] = constructWhatWeWant();
+	var globalObject = typeof window === 'object' ? window : typeof global === 'object' ? global : null;
+	if (!globalObject) {
+		throw ReferenceError('Global object is not found.');
+	}
+
+	globalObject[wlcGlobalNameSpace] = constructWhatWeWant();
 
 
 
