@@ -29,10 +29,12 @@
 
 
 
+	var globalObject = typeof window === 'object' ? window : typeof global === 'object' ? global : null;
+	if (!globalObject) {
+		throw ReferenceError('Global object is not found.');
+	}
 
-
-	var global = global || window;
-	var core = global.wlc && global.wlc.core;
+	var core = globalObject.wlc && globalObject.wlc.core;
 	if (!core) {
 		throw ReferenceError('The "wlc.core" is not defined.');
 	}

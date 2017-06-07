@@ -8,8 +8,12 @@
 	var thisNameSpace = 'utilities';
 
 
-	var global = global || window;
-	var wlc = global.wlc;
+	var globalObject = typeof window === 'object' ? window : typeof global === 'object' ? global : null;
+	if (!globalObject) {
+		throw ReferenceError('Global object is not found.');
+	}
+
+	var wlc = globalObject.wlc ;
 	if (!wlc) {
 		throw ReferenceError('The global "wlc" object is not defined.');
 	}
