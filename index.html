@@ -11,15 +11,24 @@
 </head>
 <body>
     <script>
-        var testString = 'a. b.c .length';
-        var omissible = 'a.b';
-        window.a = {
-            b: {
-                c: 'wlc'
-            }
-        }
-        wlc.core.defaultConsole.l(wlc.core.evaluateObjectFullAccessingPath(testString, omissible));
-        wlc.core.defaultConsole.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));
+        (function () {
+            var C = wlc.core.defaultConsole;
+
+            var testString = 'a. b.c .length';
+            var omissible = 'a.b';
+
+            C.l('path:', '"'+testString+'"');
+            C.l('prefix:', '"'+omissible+'"');
+
+            window.a = {
+                b: {
+                    c: 'wlc'
+                }
+            };
+
+            C.l(wlc.core.evaluateObjectFullAccessingPath(testString, omissible));
+            C.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));
+        })();
     </script>
 </body>
 </html>

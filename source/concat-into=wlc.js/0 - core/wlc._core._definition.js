@@ -202,7 +202,12 @@
 				.concat(pathToCheckEvaluatedSegments);
 		}
 
-		console.log('here', omissiblePrefixOfPath, pathToCheckEvaluatedSegments[0], pathToCheckIsAnAbsolutePath, !omissiblePrefixOfPathIsAnAbsolutePath);
+		console.log(
+			'prefix', omissiblePrefixOfPath,
+			'\npath segments', pathToCheckEvaluatedSegments[0],
+			'\npath abs?', pathToCheckIsAnAbsolutePath,
+			'\nprefix !abs?', !omissiblePrefixOfPathIsAnAbsolutePath
+		);
 		if (pathToCheckIsAnAbsolutePath && !omissiblePrefixOfPathIsAnAbsolutePath) {
 			if (omissiblePrefixOfPath) {
 				omissiblePrefixEvaluatedSegments.unshift(globalObjectName);
