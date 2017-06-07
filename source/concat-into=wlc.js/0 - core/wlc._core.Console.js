@@ -43,7 +43,7 @@
 	}
 
 	var WlcConsole = constructWhatWeWant(
-		global.console,
+		globalObject.console,
 		methodAliasMap,
 		core.nilFunction
 	);
