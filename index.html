@@ -14,20 +14,50 @@
         (function () {
             var C = wlc.core.defaultConsole;
 
+
+
             var testString = 'a. b.c .length';
-            var omissible = 'a.b';
+            var omissible = '';
+
+            window.a = {
+                b: {
+                    c: 'abc'
+                }
+            };
 
             C.l('path:', '"'+testString+'"');
             C.l('prefix:', '"'+omissible+'"');
 
-            window.a = {
-                b: {
-                    c: 'wlc'
+            C.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));
+            C.l('');
+
+            // ---------------------
+
+            omissible = 'e.f.g';
+
+            window.e = {
+                f: {
+                    g: 'efg'
                 }
             };
 
-            C.l(wlc.core.evaluateObjectFullAccessingPath(testString, omissible));
-            C.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));
+            C.l('path:', '"'+testString+'"');
+            C.l('prefix:', '"'+omissible+'"');
+
+            C.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));            
+            C.l('');
+
+            // ---------------------
+
+
+            C.l('path:', '"'+testString+'"');
+            C.l('prefix:', '"'+omissible+'"');
+
+            window.a.b.c = 'efgabc';
+            window.e.f.g = { a: window.a };
+
+            C.l(wlc.core.evaluateValueViaAccessingPath(testString, omissible));            
+            C.l('');
         })();
     </script>
 </body>

@@ -103,7 +103,8 @@
 			return result;
 		}
 
-		console.log(evaluatedFullPathSegments.join('.'));
+
+		// console.debug(evaluatedFullPathSegments.join('.'));
 
 
 		var evaluatedValue = globalObject;
@@ -202,12 +203,12 @@
 				.concat(pathToCheckEvaluatedSegments);
 		}
 
-		console.log(
-			'prefix', omissiblePrefixOfPath,
-			'\npath segments', pathToCheckEvaluatedSegments[0],
-			'\npath abs?', pathToCheckIsAnAbsolutePath,
-			'\nprefix !abs?', !omissiblePrefixOfPathIsAnAbsolutePath
-		);
+		// console.debug(
+		// 	'prefix', omissiblePrefixOfPath,
+		// 	'\npath segments', pathToCheckEvaluatedSegments[0],
+		// 	'\npath abs?', pathToCheckIsAnAbsolutePath,
+		// 	'\nprefix !abs?', !omissiblePrefixOfPathIsAnAbsolutePath
+		// );
 		if (pathToCheckIsAnAbsolutePath && !omissiblePrefixOfPathIsAnAbsolutePath) {
 			if (omissiblePrefixOfPath) {
 				omissiblePrefixEvaluatedSegments.unshift(globalObjectName);
@@ -220,7 +221,7 @@
 		if (pathToCheckIsAnAbsolutePath && omissiblePrefixOfPathIsAnAbsolutePath) {
 			var evaluatedPathToCheck = pathToCheckEvaluatedSegments.join('.');
 			var evaluatedPrefix = omissiblePrefixEvaluatedSegments.join('.');
-			console.log(evaluatedPathToCheck, '\n'+evaluatedPrefix);
+			// console.debug(evaluatedPathToCheck, '\n'+evaluatedPrefix);
 
 			var pathToCheckContainsPrefix = evaluatedPathToCheck.match(evaluatedPrefix)
 				&& evaluatedPathToCheck.length > evaluatedPrefix.length;
